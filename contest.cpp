@@ -53,14 +53,58 @@ ll modInv(ll a, ll m = mod7) { return modExp(a, m - 2, m); }
 
 /*
     Simple Observations
+    ans will always be in decreasing order (not striclty decreasing)
 */
 
 /*
     Algorithm
 */
 
+// So for values of k = 1, 2, 3 ---> n - 1
+// how is a good array ? -> agr saare adjacent ka abs diff >= k
 void solve() { 
-    
+    ll n; cin >> n;
+    vector<ll> v(n);
+    for(ll i = 0; i < n; i++) cin >> v[i];
+
+    map<ll, vector<ll>> mp;
+    for(ll i = 0; i < n - 1; i++){
+        mp[abs(v[i] - v[i + 1])].push_back(i + 1);
+    }
+
+    set<pair<ll, ll>> curr;  
+    curr.insert({1, n});
+    vector<ll> ans;
+    ans.push_back((n * (n - 1)) / 2);
+
+    auto contrib = [](ll len) -> ll {
+        return len * (len - 1) / 2;
+    };
+
+    for(ll k = 2; k < n; k++){
+        ll res = ans.back();
+        vector<ll> breakPoints = mp[k - 1];
+        for(ll bp : breakPoints){
+            auto it = curr.upper_bound({bp + 1, -1LL}); 
+            --it;
+            pair<ll, ll> x = *it;
+            ll l = x.first;
+            ll r = x.second;
+
+            ll len = r - l + 1;
+            res -= contrib(len);
+            ll len1 = bp - l + 1;
+            ll len2 = r - bp;
+            res += contrib(len1) + contrib(len2);
+
+            curr.erase(it);
+            curr.insert({l, bp});
+            curr.insert({bp + 1, r});
+        }
+        ans.push_back(res);
+    }
+    for(auto it : ans) cout << it << " ";
+    cout << endl;
 }
 
 int main() {
